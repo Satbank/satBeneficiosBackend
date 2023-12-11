@@ -2,27 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Models\Cliente;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreClienteRequest;
 use App\Http\Requests\UpdateClienteRequest;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 
 class ClienteController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            // Obter todos os registros da tabela 'clientes' com o relacionamento 'users'
-            $clientes = Cliente::with('users')->get();
-
+            // Obter o parâmetro de pesquisa da solicitação
+            $search = $request->input('search');
+    
+            // Definir o número de itens por página
+            $perPage = $request->input('pageSize', 10);
+    
+            // Consultar clientes com base no parâmetro de pesquisa
+            $clientesQuery = Cliente::query();
+    
+            if ($search) {
+                $clientesQuery->where('nome', 'LIKE', "%$search%")
+                               ->orWhere('cpf', 'LIKE', "%$search%")
+                               ->orWhere('telefone', 'LIKE', "%$search%")
+                               // Adicione outros campos que você deseja pesquisar
+                               ->orWhereHas('users', function ($query) use ($search) {
+                                   $query->where('email', 'LIKE', "%$search%");
+                               });
+            }
+    
+            // Paginar os resultados
+            $clientes = $clientesQuery->with('users')->paginate($perPage);
+    
+    
             // Montar a resposta JSON com os detalhes necessários
             $responseData = [];
             foreach ($clientes as $cliente) {
                 $responseData[] = [
+                    'users_id'=>$cliente->users_id,
                     'nome' => $cliente->nome,
                     'cpf' => $cliente->cpf,
                     'telefone' => $cliente->telefone,
@@ -34,20 +56,23 @@ class ClienteController extends Controller
                     'uf' => $cliente->uf,
                     'prefeitura_id' => $cliente->prefeitura_id,
                     'email' => $cliente->users->email,
+                    
                 ];
             }
-
+    
             // Retornar a resposta JSON
-            return response()->json(['clientes' => $responseData], 200);
+            return response()->json([
+                'clientes' => $responseData,
+                'totalPages' => $clientes->lastPage(),
+            ], 200);
         } catch (\Exception $e) {
             // Se houver um erro, retornar uma resposta JSON com a mensagem de erro
             return response()->json(['error' => 'Erro ao buscar clientes: ' . $e->getMessage()], 500);
         }
     }
+    
 
-    /**
-     * Show the form for creating a new resource.
-     */
+    
     public function create()
     {
         //
