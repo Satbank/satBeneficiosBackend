@@ -14,10 +14,10 @@ class PrefeituraSeeder extends Seeder
     public function run(): void
     {
         DB::table('prefeituras')->insert([
-            'users_id' => 2, // Substitua pelo ID real do usuário associado à prefeitura
-            'razao_social' => 'Razão Social da Prefeitura 2',
-            'nome_fantasia' => 'Nome Fantasia da Prefeitura 2',
-            'cnpj' => '11111111111111', // Substitua pelo CNPJ real
+            'users_id' => 62, // Substitua pelo ID real do usuário associado à prefeitura
+            'razao_social' => 'Razão Social da Prefeitura',
+            'nome_fantasia' => 'Nome Fantasia da Prefeitura ',
+            'cnpj' => '22222222222222', // Substitua pelo CNPJ real
             'telefone' => '11111111111',
             'rua' => 'Rua Exemplo',
             'numero' => '123',

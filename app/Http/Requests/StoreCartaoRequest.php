@@ -11,7 +11,7 @@ class StoreCartaoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,22 @@ class StoreCartaoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            // Adicione as regras de validação necessárias aqui
+            'numero_cartao' => 'required|unique:cartoes,numero_cartao',
+            // outras regras...
+        ];
+    }
+
+    /**
+     * Get custom error messages for validator errors.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'numero_cartao.unique' => 'Já existe um cartão com esse número cadastrado.',
+            // outras mensagens de erro personalizadas...
         ];
     }
 }

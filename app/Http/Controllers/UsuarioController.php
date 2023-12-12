@@ -19,7 +19,7 @@ class UsuarioController extends Controller
         $user = $request->user();
 
         if ($user) {
-            $perfil_id = $user->perfil_id;
+            $perfil_id = $user->perfils_id;
 
             switch ($perfil_id) {
                 case 1:

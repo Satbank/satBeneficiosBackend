@@ -96,7 +96,7 @@ class ClienteController extends Controller
             $user = User::create([
                 'email' => $request->email,
                 'password' => bcrypt($request->senha),
-                'perfil_id' => '2'
+                'perfils_id' => '4'
             ]);
 
             // Criar um novo Cliente associado ao usuário
