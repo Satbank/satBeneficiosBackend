@@ -4,8 +4,52 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1ed1aca5e69025247e71e27a5da69964",
+    "content-hash": "e1043255c6f3a145af2378a2b30bbc68",
     "packages": [
+        {
+            "name": "brazanation/documents",
+            "version": "v2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brazanation/php-documents.git",
+                "reference": "fd18089ba15506876267c42e1a23471fae2dede0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brazanation/php-documents/zipball/fd18089ba15506876267c42e1a23471fae2dede0",
+                "reference": "fd18089ba15506876267c42e1a23471fae2dede0",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "require-dev": {
+                "codacy/coverage": "^1.0",
+                "phpunit/phpunit": "^6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brazanation\\Documents\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Antonio Spinelli",
+                    "email": "tonicospinelli85@gmail.com"
+                }
+            ],
+            "description": "Provides Brazilian Documents",
+            "support": {
+                "issues": "https://github.com/brazanation/php-documents/issues",
+                "source": "https://github.com/brazanation/php-documents/tree/v2.1.0"
+            },
+            "time": "2022-03-21T14:35:13+00:00"
+        },
         {
             "name": "brick/math",
             "version": "0.11.0",

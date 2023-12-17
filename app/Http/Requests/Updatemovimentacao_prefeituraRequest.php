@@ -11,7 +11,7 @@ class Updatemovimentacao_prefeituraRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**

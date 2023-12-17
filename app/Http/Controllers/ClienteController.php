@@ -19,32 +19,32 @@ class ClienteController extends Controller
         try {
             // Obter o parâmetro de pesquisa da solicitação
             $search = $request->input('search');
-    
+
             // Definir o número de itens por página
             $perPage = $request->input('pageSize', 10);
-    
+
             // Consultar clientes com base no parâmetro de pesquisa
             $clientesQuery = Cliente::query();
-    
+
             if ($search) {
                 $clientesQuery->where('nome', 'LIKE', "%$search%")
-                               ->orWhere('cpf', 'LIKE', "%$search%")
-                               ->orWhere('telefone', 'LIKE', "%$search%")
-                               // Adicione outros campos que você deseja pesquisar
-                               ->orWhereHas('users', function ($query) use ($search) {
-                                   $query->where('email', 'LIKE', "%$search%");
-                               });
+                    ->orWhere('cpf', 'LIKE', "%$search%")
+                    ->orWhere('telefone', 'LIKE', "%$search%")
+                    // Adicione outros campos que você deseja pesquisar
+                    ->orWhereHas('users', function ($query) use ($search) {
+                        $query->where('email', 'LIKE', "%$search%");
+                    });
             }
-    
+
             // Paginar os resultados
             $clientes = $clientesQuery->with('users')->paginate($perPage);
-    
-    
+
+
             // Montar a resposta JSON com os detalhes necessários
             $responseData = [];
             foreach ($clientes as $cliente) {
                 $responseData[] = [
-                    'users_id'=>$cliente->users_id,
+                    'users_id' => $cliente->users_id,
                     'nome' => $cliente->nome,
                     'cpf' => $cliente->cpf,
                     'telefone' => $cliente->telefone,
@@ -56,10 +56,10 @@ class ClienteController extends Controller
                     'uf' => $cliente->uf,
                     'prefeitura_id' => $cliente->prefeitura_id,
                     'email' => $cliente->users->email,
-                    
+
                 ];
             }
-    
+
             // Retornar a resposta JSON
             return response()->json([
                 'clientes' => $responseData,
@@ -70,9 +70,9 @@ class ClienteController extends Controller
             return response()->json(['error' => 'Erro ao buscar clientes: ' . $e->getMessage()], 500);
         }
     }
-    
 
-    
+
+
     public function create()
     {
         //
@@ -81,53 +81,52 @@ class ClienteController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+
     public function store(StoreClienteRequest $request)
     {
+        // Tratar CNPJ, e telefone      
+        $telefone = preg_replace('/[^0-9]/', '', $request->telefone);
     
-        try {
-            // Iniciar uma transação
-            DB::beginTransaction();
-
-            // Tratar CNPJ,  e telefone
-            $cpf = preg_replace('/[^0-9]/', '', $request->cpf);
-            $telefone = preg_replace('/[^0-9]/', '', $request->telefone);
-
-            // Criar um novo usuário
-            $user = User::create([
-                'email' => $request->email,
-                'password' => bcrypt($request->senha),
-                'perfils_id' => '4'
-            ]);
-
-            // Criar um novo Cliente associado ao usuário
-            $cliente = new Cliente([
-                'nome' => $request->nome,
-                'cpf' => $cpf,
-                'telefone' => $telefone,
-                'rua' => $request->rua,
-                'numero' => $request->numero,
-                'bairro' => $request->bairro,
-                'complemento' => $request->complemento,
-                'cidade' => $request->cidade,
-                'uf' => $request->uf,
-                'prefeitura_id' => $request->prefeitura_id,
-            ]);
-
-            // Associar o cliente ao usuário
-            $user->cliente()->save($cliente);
-
-            // Commit da transação se todas as operações foram bem-sucedidas
-            DB::commit();
-
-            // Retornar uma resposta JSON com os detalhes do cliente recém-criado
-            return response()->json(['success' => 'Cliente cadastrado com sucesso'], 201);
-        } catch (\Exception $e) {
-            // Se houver um erro durante a criação, realizar rollback da transação
+       
+    
+        // Iniciar uma transação
+        DB::beginTransaction();
+    
+        // Criar um novo usuário
+        $user = User::create([
+            'email' => $request->email,
+            'password' => bcrypt($request->senha),
+            'perfils_id' => '4'
+        ]);
+      
+        // Criar um novo Cliente associado ao usuário
+        $cliente = new Cliente([
+            'nome' => $request->nome,
+            'cpf' => $request->cpf,
+            'telefone' => $telefone,
+            'rua' => $request->rua,
+            'numero' => $request->numero,
+            'bairro' => $request->bairro,
+            'complemento' => $request->complemento,
+            'cidade' => $request->cidade,
+            'uf' => $request->uf,
+            'prefeitura_id' => $request->prefeitura_id,
+        ]);
+    
+        // Associar o cliente ao usuário
+        $user->cliente()->save($cliente);
+    
+        // Verificar se a transação foi bem-sucedida e retornar a resposta apropriada
+        if (DB::commit()) {
+            return;
+        } else {
+            // Se não for bem-sucedida, realizar o rollback e retornar uma resposta JSON com a mensagem de erro
             DB::rollBack();
-            // Retornar uma resposta JSON com a mensagem de erro
-            return response()->json(['error' => 'Erro ao criar cliente: ' . $e->getMessage()], 500);
+            return ;
         }
     }
+    
 
     /**
      * Display the specified resource.

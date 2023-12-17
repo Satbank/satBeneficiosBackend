@@ -22,7 +22,20 @@ class StoreClienteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'cpf'           => 'unique:clientes',          
+            'email'         => 'email|unique:users', 
+            'prefeitura_id' =>'required'
         ];
     }
+    public function messages()
+{
+    return [
+      
+        'cpf.unique' => 'O cpf informado já está em uso',
+        'email.email' => 'O email informado não é válido',
+        'email.unique' => 'O email informado já está em uso',
+        'required' => 'O campo :attribute deve ser preenchido' 
+    ];
+}
+
 }

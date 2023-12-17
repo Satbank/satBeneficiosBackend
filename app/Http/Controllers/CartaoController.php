@@ -37,7 +37,8 @@ class CartaoController extends Controller
             }
     
             // Paginar os resultados e carregar a relação 'cliente'
-            $cartoes = $cartoesQuery->paginate($perPage);
+            $cartoes = $cartoesQuery->with('cliente')->paginate($perPage);
+    
             // Montar a resposta JSON com os detalhes necessários
             $responseData = [];
             foreach ($cartoes as $cartao) {
@@ -58,7 +59,7 @@ class CartaoController extends Controller
             // Obtém a quantidade total de páginas
             $totalPages = ceil($cartoes->total() / $cartoes->perPage());
     
-            return response()->json([ 'cartoes' => $responseData, 'totalPages' => $totalPages], 200);
+            return response()->json(['success' => true, 'data' => $responseData, 'totalPages' => $totalPages], 200);
         } catch (\Exception $e) {
             // Lidar com exceções (erros)
             return response()->json(['error' => 'Erro ao obter os cartões: ' . $e->getMessage()], 500);

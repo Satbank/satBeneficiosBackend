@@ -3,6 +3,7 @@
 use App\Http\Controllers\CartaoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ComercioController;
+use App\Http\Controllers\MovimentacaoPrefeituraController;
 use App\Http\Controllers\PrefeituraController;
 use App\Http\Controllers\UsuarioController;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/prefeitura', PrefeituraController::class);
     Route::apiResource('/cliente', ClienteController::class);
     Route::apiResource('/cartao', CartaoController::class);
+    Route::apiResource('/movimentacaoPrefeitura', MovimentacaoPrefeituraController::class);
 
     //Route::apiResource('/empresas', ComercioController::class);
 });
