@@ -12,4 +12,8 @@ class Prefeitura extends Model
     {
         return $this->belongsTo(User::class, 'users_id');
     }
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao_prefeitura_cliente::class, 'prefeituras_id');
+    }
 }

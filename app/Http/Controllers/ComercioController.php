@@ -17,13 +17,14 @@ class ComercioController extends Controller
       
         try {
             // Obter todos os registros da tabela 'comercios' com o relacionamento 'users'
-            $comercios = Comercio::with('users')->get();
+            $comercios = Comercio::with('users', 'prefeitura')->get();
          
             // Montar a resposta JSON com os detalhes necessários
             $responseData = [];
             foreach ($comercios as $comercio) {
                 $responseData[] = [
                     'razao_social' => $comercio->razao_social,
+                    'nome_fantasia_prefeitura' => $comercio->prefeitura->nome_fantasia,
                     'nome_fantasia' => $comercio->nome_fantasia,
                     'cnpj' => $comercio->cnpj,
                     'inscricao_estadual' => $comercio->inscricao_estadual,

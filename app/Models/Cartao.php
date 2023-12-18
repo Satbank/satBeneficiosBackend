@@ -19,7 +19,7 @@ class Cartao extends Model
         'status',
         'data_validade',
         'valor_alocado',
-        'saldo_atual',
+        'saldo',
     ];
 
     protected $guarded = [
@@ -30,6 +30,11 @@ class Cartao extends Model
 
     public function cliente()
     {
-        return $this->belongsTo(Cliente::class, 'users_id', 'users_id');
+        return $this->belongsTo(Cliente::class, 'users_id', 'users_id', 'clientes_id');
+    }
+    
+    public function movimentacoes()
+    {
+        return $this->hasMany(Movimentacao_prefeitura_cliente::class, 'clientes_id');
     }
 }

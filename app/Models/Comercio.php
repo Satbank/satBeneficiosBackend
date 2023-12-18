@@ -15,5 +15,8 @@ class Comercio extends Model
     {
         return $this->belongsTo(User::class, 'users_id');
     }
-    
+    public function prefeitura()
+    {
+        return $this->belongsTo(Prefeitura::class, 'prefeitura_id');
+    }
 }
