@@ -13,25 +13,101 @@ use Illuminate\Support\Facades\DB;
 
 class MovimentacaoPrefeituraClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+   
     public function index()
     {
         //
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+   
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function alocarValorIndividual(StoreMovimentacao_prefeitura_clienteRequest $request){
+         // 1. Pegar os dados do request        
+         $tipoMovimentacao = $request->tipo;
+         $saldo =  str_replace(",", ".", $request->saldo);
+       
+
+             // 2. Verificar o tipo de movimentação e atualizar o saldo da prefeitura
+        $prefeiturasId = $request->input('prefeituras_id');
+        $prefeitura = Prefeitura::find($prefeiturasId);
+
+        if (!$prefeitura) {
+            return response()->json(['error' => 'Prefeitura não encontrada.'], 404);
+        }
+
+        // Iniciar a transação
+        DB::beginTransaction();
+
+        try {
+            // Atualizar o saldo na tabela movimentacao_prefeitura
+            $movimentacaoRecente = movimentacao_prefeitura::where('prefeituras_id', $prefeiturasId)
+                ->latest()
+                ->first();
+
+            if (!$movimentacaoRecente) {
+                return response()->json(['error' => 'Não foi encontrada nenhuma movimentação recente.'], 400);
+            }
+
+            $saldoPrefeitura = $movimentacaoRecente->saldo;
+            $valorMovimentadoTotal =   $saldo;
+
+            if ($tipoMovimentacao === 'entrada') {
+                $saldoAtualizado = $saldoPrefeitura - $valorMovimentadoTotal;
+                $tipoMovimentacaoRegistrado = 'saida';
+            } elseif ($tipoMovimentacao === 'saida') {
+                $saldoAtualizado = $saldoPrefeitura + $valorMovimentadoTotal;
+                $tipoMovimentacaoRegistrado = 'entrada';
+            }
+            //se o saldo for ficar negativo retorna o erro!
+            if ($saldoAtualizado < 0) {
+                return response()->json(['error' => 'Saldo da prefeitura insuficiente.'], 400);
+            }
+            movimentacao_prefeitura::create([
+                'prefeituras_id' => $prefeitura->id,
+                'tipo' => $tipoMovimentacaoRegistrado,
+                'valor_alocado' => $valorMovimentadoTotal,
+                'saldo' => $saldoAtualizado,
+            ]);
+            
+            
+            //atualizar o saldo na tabela cartoes
+
+            $numeroCartao = $request->input('numero_cartao');
+            $cartao = Cartao::where('numero_cartao', $numeroCartao)->first();
+           
+       
+            
+            $saldoCartaoAtual = $cartao->saldo;
+            
+            if ($tipoMovimentacao === 'entrada') {
+                $saldoCartaoAtualizado = $saldoCartaoAtual + $saldo;
+            } elseif ($tipoMovimentacao === 'saida') {
+                // Verifica se há saldo suficiente para a movimentação de saída
+                if ($valorMovimentadoTotal > $saldoCartaoAtual) {
+                    return response()->json(['error' => 'Saldo insuficiente para a movimentação de saída.'], 400);
+                }
+            
+                $saldoCartaoAtualizado = $saldoCartaoAtual - $saldo;
+            } else {
+                return response()->json(['error' => 'Tipo de movimentação inválido.'], 400);
+            }
+         
+            // Atualizar o saldo na tabela de cartoes
+            $cartao->update(['saldo' => $saldoCartaoAtualizado]);
+            DB::commit();
+            return response()->json(['message' => 'Movimentação registrada com sucesso'], 200);
+        } catch (\Exception $e) {
+            // Reverter a transação em caso de erro
+            DB::rollback();       
+           
+            return response()->json(['error' => 'Erro ao processar a movimentação.'], 500);
+        }
+    }
+ 
     public function store(StoreMovimentacao_prefeitura_clienteRequest $request)
     {
         // 1. Pegar os dados do request
@@ -127,8 +203,7 @@ class MovimentacaoPrefeituraClienteController extends Controller
         } catch (\Exception $e) {
             // Reverter a transação em caso de erro
             DB::rollback();
-            dd($e->getMessage());
-
+          
             return response()->json(['error' => 'Erro ao processar a movimentação.'], 500);
         }
     }

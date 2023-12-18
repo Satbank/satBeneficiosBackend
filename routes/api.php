@@ -19,5 +19,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/cartao', CartaoController::class);
     Route::apiResource('/movimentacaoPrefeitura', MovimentacaoPrefeituraController::class);  
     Route::apiResource('/movimentacaoPrefeituraCliente', MovimentacaoPrefeituraClienteController::class);  
+    Route::post('/movimentacaoPrefeituraCliente/alocar-valor-individual', [MovimentacaoPrefeituraClienteController::class, 'alocarValorIndividual']);
+
     //Route::apiResource('/empresas', ComercioController::class);
 });
