@@ -24,7 +24,7 @@ class AddPerfilIdToUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign(['perfils_id']); // Remove a chave estrangeira
-            $table->dropColumn('perfil_id'); // Remove a coluna 'perfil_id'
+            $table->dropColumn('perfils_id'); // Remove a coluna 'perfil_id'
         });
     }
 }
