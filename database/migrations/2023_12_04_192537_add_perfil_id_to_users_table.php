@@ -11,8 +11,8 @@ class AddPerfilIdToUsersTable extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('perfil_id'); // Adiciona a coluna 'perfil_id'
-
+            $table->unsignedBigInteger('perfil_id')->nullable(); // Adiciona a coluna 'perfil_id' permitindo nulos
+    
             $table->foreign('perfil_id')->references('id')->on('perfils')->onDelete('set null'); // Adiciona a chave estrangeira
         });
     }
