@@ -17,9 +17,9 @@ class UsersTableSeeder extends Seeder
        // Inserir dados fictícios
        DB::table('users')->insert([
       
-        'email' => 'teste3@gmail.com',
+        'email' => 'teste@gmail.com',
         'password' => Hash::make('123456'),
-        'perfils_id'=> '2'
+        'perfils_id'=> '1'
     ]);
     }
 }
