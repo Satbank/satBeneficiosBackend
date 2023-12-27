@@ -13,13 +13,13 @@ class Cartao extends Model
     protected $fillable = [
         'users_id',
         'tipo_cartao',
-        'numero_cartao',
-        'saldo_disponivel',
+        'numero_cartao',   
         'data_emissao',
         'status',
-        'data_validade',
-        'valor_alocado',
+        'data_validade',      
         'saldo',
+        'senha',
+        'tentativas'
     ];
 
     protected $guarded = [

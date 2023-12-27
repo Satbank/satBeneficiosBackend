@@ -15,12 +15,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('users_id');
             $table->string('tipo_cartao');
-            $table->string('numero_cartao',16);        
+            $table->string('numero_cartao',16);
+            $table->string('senha');        
             $table->date('data_emissao');
             $table->string('status');
             $table->decimal('saldo', 10, 2)->default(0.0);
-            $table->date('data_validade');            
-            $table->decimal('valor_alocado', 10, 2)->nullable();         
+            $table->date('data_validade'); 
+            $table->integer('tentativas')->default(0);      
             $table->timestamps();
     
             $table->foreign('users_id')->references('id')->on('users');

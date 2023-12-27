@@ -64,11 +64,12 @@ class UsuarioController extends Controller
                     $userWithComercioData = User::with(['comercio' => function ($query) {
                         $query->select('users_id', 'razao_social', 'telefone');
                     }])->find($user->id);
-
+                  
+                    $comercio = $userWithComercioData->comercio->first();
                     // Se houver um comércio associado, extrai a razão social e o telefone
-                    $razaoSocialComercio = $userWithComercioData->comercio ? $userWithComercioData->comercio->razao_social : null;
-                    $telefoneComercio = $userWithComercioData->comercio ? $userWithComercioData->comercio->telefone : null;
-
+                    $razaoSocialComercio = $comercio ? $comercio->razao_social : null;
+                    $telefoneComercio = $comercio ? $comercio->telefone : null;
+                  
                     // Remove a relação 'comercio' do objeto principal
                     unset($userWithComercioData->comercio);
 

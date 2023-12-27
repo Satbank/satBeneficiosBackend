@@ -58,7 +58,7 @@ class User extends Authenticatable
     }
     public function comercio()
     {
-        return $this->hasMany(Comercio::class, 'users_id');
+        return $this->hasMany(Comercio::class, 'users_id',);
     }
     public function cliente()
     {

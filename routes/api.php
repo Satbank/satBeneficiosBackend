@@ -3,6 +3,7 @@
 use App\Http\Controllers\CartaoController;
 use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\ComercioController;
+use App\Http\Controllers\MovimentacaoClienteComercioController;
 use App\Http\Controllers\MovimentacaoPrefeituraClienteController;
 use App\Http\Controllers\MovimentacaoPrefeituraController;
 use App\Http\Controllers\PrefeituraController;
@@ -20,6 +21,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/movimentacaoPrefeitura', MovimentacaoPrefeituraController::class);  
     Route::apiResource('/movimentacaoPrefeituraCliente', MovimentacaoPrefeituraClienteController::class);  
     Route::post('/movimentacaoPrefeituraCliente/alocar-valor-individual', [MovimentacaoPrefeituraClienteController::class, 'alocarValorIndividual']);
-
+    //rotas para comercio 
+   
+    Route::apiResource('/movimentacaoClienteComercio', MovimentacaoClienteComercioController::class);  
+    Route::get('/relatorioComercio', [MovimentacaoClienteComercioController::class, 'getRelatorios']);
     //Route::apiResource('/empresas', ComercioController::class);
 });

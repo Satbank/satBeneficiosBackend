@@ -47,12 +47,11 @@ class CartaoController extends Controller
                     'nome'    => $cartao->cliente ? $cartao->cliente->nome : null,
                     'tipo_cartao'     => $cartao->tipo_cartao,
                     'numero_cartao'   => $cartao->numero_cartao,
-                    'saldo_disponivel' => $cartao->saldo_disponivel,
+                    'saldo'           => $cartao->saldo,
                     'data_emissao'    => $cartao->data_emissao,
                     'status'          => $cartao->status,
-                    'data_validade'   => $cartao->data_validade,
-                    'valor_alocado'   => $cartao->valor_alocado,
-                    'saldo_atual'     => $cartao->saldo_atual,
+                    'data_validade'   => $cartao->data_validade,                  
+                   
                 ];
             }
     
@@ -77,6 +76,7 @@ class CartaoController extends Controller
 
     public function store(StoreCartaoRequest $request)
     {
+     
         try {
             // Remover máscaras dos campos
             $numero_cartao = preg_replace('/\D/', '', $request->numero_cartao); // Remove não dígitos
@@ -90,13 +90,15 @@ class CartaoController extends Controller
             if (Cartao::where('numero_cartao', $numero_cartao)->exists()) {
                 return response()->json(['error' => 'Já existe um cartão com esse número cadastrado.', ], 422);
             }
+        
+            $senhaCriptografada = bcrypt($request->senha);
 
             $cartao = new Cartao([
                 'users_id'      => $request->users_id,
                 'numero_cartao' => $numero_cartao,
+                'senha'         =>  $senhaCriptografada,
                 'tipo_cartao'   => $request->tipo_cartao,
-                'status'        => $request->status,
-                'valor_alocado' => $valorAlocado,
+                'status'        => $request->status,              
                 'data_validade' => $data_validade,
                 'data_emissao'  => $data_emissao,
             ]);
