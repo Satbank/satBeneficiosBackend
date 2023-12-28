@@ -12,6 +12,7 @@ class Movimentacao_cliente_comercio extends Model
         'cartoes_id',
         'comercios_id',
         'valor',
+        'valor_original',
         'status',
     ];
     public function cartao()

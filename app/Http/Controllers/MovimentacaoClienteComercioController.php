@@ -57,6 +57,7 @@ class MovimentacaoClienteComercioController extends Controller
                     'id' => $movimentacao->id,
                     'nome' => $cliente->nome,
                     'valor' => $movimentacao->valor,
+                    'valor_original' => $movimentacao->valor_original,
                     'status' => $movimentacao->status,
                     'data' => $movimentacao->created_at,
                 ];
@@ -78,23 +79,20 @@ class MovimentacaoClienteComercioController extends Controller
             $valor =  str_replace(",", ".", $request->valor);
             $numero_cartao = preg_replace('/\D/', '', $request->numero_cartao);
 
-            // 1. Verifica a senha no cartão
+            //verifica se existe o cartão
             $cartao = Cartao::where('numero_cartao', $numero_cartao)->first();
 
             if (!$cartao) {
                 return response()->json(['error' => 'Cartão não encontrado.'], 422);
             }
-
+            //verifica se esta ativo
             if ($cartao->status !== 'ativo') {
                 return response()->json(['error' => 'Cartão bloqueado ou inativo.'], 422);
             }
-
-            $senhaCriptografadaRequest = bcrypt($request->senha);
-
-            if (Hash::check($senhaCriptografadaRequest, $cartao->senha)) {
+            //verifica a senha 
+            if (!Hash::check($request->senha, $cartao->senha)) {
                 // Incrementa o contador de tentativas
                 $cartao->tentativas += 1;
-
                 if ($cartao->tentativas >= 3) {
                     // Bloqueia o cartão se exceder as tentativas permitidas
                     $cartao->status = 'bloqueado';
@@ -103,7 +101,8 @@ class MovimentacaoClienteComercioController extends Controller
                 $cartao->save();
 
                 // Retorna a resposta incluindo o número de tentativas restantes
-                return response()->json(['error' => 'Senha incorreta.', 'tentativas_restantes' => 3 - $cartao->tentativas], 422);
+                $mensagem = 'Senha incorreta. Restam ' . (3 - $cartao->tentativas) . ' tentativas.';
+                return response()->json(['error' => $mensagem], 422);
             }
             // Reinicia as tentativas após senha correta
             $cartao->tentativas = 0;
@@ -124,7 +123,7 @@ class MovimentacaoClienteComercioController extends Controller
             // Verificar se o saldo é suficiente
             if ($cartao->saldo < 0) {
                 DB::rollBack();
-                return response()->json(['error' => 'Saldo insuficiente. Seu saldo é: ' . $cartao->saldo], 422);
+                return response()->json(['error' => 'Saldo insuficiente'], 422);
             }
 
             // Salvar as alterações no cartão
@@ -145,6 +144,7 @@ class MovimentacaoClienteComercioController extends Controller
                 'cartoes_id' => $cartao->id,
                 'comercios_id' => $comercio->id,
                 'valor' => $valorComDesconto,
+                'valor_original' => $valor,
                 'status' => 'ativo',
             ]);
 
@@ -168,31 +168,27 @@ class MovimentacaoClienteComercioController extends Controller
     public function estornar(Request $request)
     {
         try {
-
-
-            $numero_cartao = preg_replace('/\D/', '', $request->numero_cartao);
-
-            // 1. Verificar o cartão
-            $cartao = Cartao::where('numero_cartao', $numero_cartao)->first();
-
-            if (!$cartao || $cartao->status !== 'ativo') {
-                return response()->json(['error' => 'Cartão não encontrado ou bloqueado.'], 422);
-            }
-
-            // 2. Verificar a movimentação a ser estornada
-            $movimentacao = Movimentacao_cliente_comercio::find($request->movimentacao_id);
-
+            // 1. Obter movimentação a ser estornada
+            $movimentacao = Movimentacao_cliente_comercio::find($request->id);
             if (!$movimentacao || $movimentacao->status !== 'ativo') {
                 return response()->json(['error' => 'Movimentação não encontrada ou não ativa.'], 422);
             }
 
+            // 2. Obter cartão associado à movimentação
+            $cartao = Cartao::find($movimentacao->cartoes_id);
+            if (!$cartao || $cartao->status !== 'ativo') {
+                return response()->json(['error' => 'Cartão não encontrado ou bloqueado. Entre em contato com suporte.'], 422);
+            }
+            //começar transação de inserção no banco de dados 
             DB::beginTransaction();
 
             // 3. Devolver saldo ao cartão
-            $valorOriginal = $movimentacao->valor; // Valor da transação original
-            $valorDescontadoCliente = $valorOriginal * 0.02; // 2% descontados do cliente
-
-            $cartao->saldo += $request->valor_estorno + $valorDescontadoCliente;
+            $valorOriginal = $movimentacao->valor_original; // Valor da transação original
+            // Obter o valor de taxas_clientes da tabela recebimentos_sat_banks
+            $taxasClientes = Recebimentos_sat_bank::where('movimentacao_cliente_comercios_id', $movimentacao->id)->value('taxas_clientes');
+            // Adicionar as taxas do cliente ao valor de estorno
+            $valorEstorno = $valorOriginal + $taxasClientes;
+            $cartao->saldo += $valorEstorno;
             $cartao->save();
 
             // 4. Atualizar status na movimentacao_cliente_comercios

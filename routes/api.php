@@ -25,5 +25,6 @@ Route::middleware(['auth:api'])->group(function () {
    
     Route::apiResource('/movimentacaoClienteComercio', MovimentacaoClienteComercioController::class);  
     Route::get('/relatorioComercio', [MovimentacaoClienteComercioController::class, 'getRelatorios']);
+    Route::post('/estorno', [MovimentacaoClienteComercioController::class, 'estornar']);
     //Route::apiResource('/empresas', ComercioController::class);
 });

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('cartoes_id');
             $table->unsignedBigInteger('comercios_id');
             $table->decimal('valor', 10, 2);
+            $table->decimal('valor_original', 10, 2);
             $table->enum('status', ['ativo', 'pago', 'estornado'])->default('ativo');
             $table->timestamps();
     
