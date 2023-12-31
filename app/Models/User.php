@@ -43,7 +43,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-
+   
     public function admin()
     {
         return $this->hasOne(Admin::class, 'users_id');
@@ -62,6 +62,6 @@ class User extends Authenticatable
     }
     public function cliente()
     {
-        return $this->hasOne(Cliente::class, 'users_id'); 
+        return $this->hasOne(Cliente::class, 'users_id');
     }
 }

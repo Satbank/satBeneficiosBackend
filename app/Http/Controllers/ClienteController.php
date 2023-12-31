@@ -11,9 +11,10 @@ use App\Http\Requests\UpdateClienteRequest;
 
 class ClienteController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
     public function index(Request $request)
     {
         try {
@@ -24,7 +25,7 @@ class ClienteController extends Controller
             $perPage = $request->input('pageSize', 10);
 
             // Consultar clientes com base no parâmetro de pesquisa
-            $clientesQuery = Cliente::query();
+            $clientesQuery = Cliente::query()->orderBy('nome');
 
             if ($search) {
                 $clientesQuery->where('nome', 'LIKE', "%$search%")

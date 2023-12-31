@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 class MovimentacaoPrefeituraClienteController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
    
     public function index()
     {

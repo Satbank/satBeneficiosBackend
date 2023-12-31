@@ -9,23 +9,22 @@ use Illuminate\Http\Request;
 
 class CartaoController extends Controller
 {
-    // Restante do seu código...
-
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
     public function index(Request $request)
     {
         try {
             // Obter o parâmetro de pesquisa da solicitação
             $search = $request->input('search');
-    
+
             // Definir o número de itens por página
             $perPage = $request->input('pageSize', 10);
-    
+
             // Consultar cartões com base no parâmetro de pesquisa
             $cartoesQuery = Cartao::query();
-    
+
             if ($search) {
                 $cartoesQuery->where('tipo_cartao', 'LIKE', "%$search%")
                     ->orWhere('numero_cartao', 'LIKE', "%$search%")
@@ -35,10 +34,10 @@ class CartaoController extends Controller
                             ->orWhere('cpf', 'LIKE', "%$search%");
                     });
             }
-    
+
             // Paginar os resultados e carregar a relação 'cliente'
             $cartoes = $cartoesQuery->with('cliente')->paginate($perPage);
-    
+
             // Montar a resposta JSON com os detalhes necessários
             $responseData = [];
             foreach ($cartoes as $cartao) {
@@ -50,21 +49,21 @@ class CartaoController extends Controller
                     'saldo'           => $cartao->saldo,
                     'data_emissao'    => $cartao->data_emissao,
                     'status'          => $cartao->status,
-                    'data_validade'   => $cartao->data_validade,                  
-                   
+                    'data_validade'   => $cartao->data_validade,
+
                 ];
             }
-    
+
             // Obtém a quantidade total de páginas
             $totalPages = ceil($cartoes->total() / $cartoes->perPage());
-    
+
             return response()->json(['success' => true, 'data' => $responseData, 'totalPages' => $totalPages], 200);
         } catch (\Exception $e) {
             // Lidar com exceções (erros)
             return response()->json(['error' => 'Erro ao obter os cartões: ' . $e->getMessage()], 500);
         }
     }
-    
+
 
 
     public function create()
@@ -76,7 +75,7 @@ class CartaoController extends Controller
 
     public function store(StoreCartaoRequest $request)
     {
-     
+
         try {
             // Remover máscaras dos campos
             $numero_cartao = preg_replace('/\D/', '', $request->numero_cartao); // Remove não dígitos
@@ -88,9 +87,9 @@ class CartaoController extends Controller
 
             // Verificar se o número do cartão já existe
             if (Cartao::where('numero_cartao', $numero_cartao)->exists()) {
-                return response()->json(['error' => 'Já existe um cartão com esse número cadastrado.', ], 422);
+                return response()->json(['error' => 'Já existe um cartão com esse número cadastrado.',], 422);
             }
-        
+
             $senhaCriptografada = bcrypt($request->senha);
 
             $cartao = new Cartao([
@@ -98,7 +97,7 @@ class CartaoController extends Controller
                 'numero_cartao' => $numero_cartao,
                 'senha'         =>  $senhaCriptografada,
                 'tipo_cartao'   => $request->tipo_cartao,
-                'status'        => $request->status,              
+                'status'        => $request->status,
                 'data_validade' => $data_validade,
                 'data_emissao'  => $data_emissao,
             ]);
@@ -146,6 +145,4 @@ class CartaoController extends Controller
     {
         //
     }
-
-   
 }

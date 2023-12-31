@@ -10,9 +10,10 @@ use App\Models\Prefeitura;
 
 class MovimentacaoPrefeituraController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
     public function index()
     {
         $prefeituras = Prefeitura::all();

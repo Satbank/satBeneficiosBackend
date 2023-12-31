@@ -9,16 +9,18 @@ use App\Models\User;
 
 class ComercioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
+
     public function index()
     {
-      
+
         try {
             // Obter todos os registros da tabela 'comercios' com o relacionamento 'users'
             $comercios = Comercio::with('users', 'prefeitura')->get();
-         
+
             // Montar a resposta JSON com os detalhes necessários
             $responseData = [];
             foreach ($comercios as $comercio) {
@@ -40,7 +42,7 @@ class ComercioController extends Controller
                     'email' => $comercio->users->email,
                 ];
             }
-    
+
             // Retornar a resposta JSON
             return response()->json(['comercios' => $responseData], 200);
         } catch (\Exception $e) {
@@ -48,7 +50,7 @@ class ComercioController extends Controller
             return response()->json(['error' => 'Erro ao buscar comercios: ' . $e->getMessage()], 500);
         }
     }
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -77,7 +79,7 @@ class ComercioController extends Controller
                 'password' => bcrypt($request->senha),
                 'perfils_id' => '3'
             ]);
-         
+
             // Criar um novo Comercio associado ao usuário
             $comercio = new Comercio([
                 'razao_social' => $request->razao_social,
