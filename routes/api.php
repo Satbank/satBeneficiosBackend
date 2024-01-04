@@ -20,11 +20,17 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/prefeitura', PrefeituraController::class);
     Route::apiResource('/cliente', ClienteController::class);
     Route::apiResource('/cartao', CartaoController::class);
-    Route::apiResource('/totalmes', RecebimentosSatBankController::class);
+    //movimentações financeiras feita pelo admin
     Route::apiResource('/movimentacaoPrefeitura', MovimentacaoPrefeituraController::class);  
     Route::apiResource('/movimentacaoPrefeituraCliente', MovimentacaoPrefeituraClienteController::class);  
     Route::post('/movimentacaoPrefeituraCliente/alocar-valor-individual', [MovimentacaoPrefeituraClienteController::class, 'alocarValorIndividual']);
-    
+    // buscas da dashboard
+    Route::get('/totalcartoes',[RecebimentosSatBankController::class , 'totalCartoes']);
+    Route::get('/totalclientesbase',[RecebimentosSatBankController::class , 'totalClienteBase']);
+    Route::get('/totalcomerciosbase',[RecebimentosSatBankController::class , 'totalComerciosBase']);
+    Route::get('/totalano',[RecebimentosSatBankController::class , 'totalAno']);
+    Route::apiResource('/totalmes', RecebimentosSatBankController::class);
+
     //rotas para comercio 
     Route::apiResource('/movimentacaoClienteComercio', MovimentacaoClienteComercioController::class);  
     Route::get('/relatorioComercio', [MovimentacaoClienteComercioController::class, 'getRelatorios']);

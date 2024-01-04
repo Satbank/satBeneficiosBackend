@@ -36,6 +36,59 @@ class RecebimentosSatBankController extends Controller
         return response()->json(['total_taxas' => $totalTaxas]);
     }
 
+    public function totalAno(){
+        // Obtém o ano em vigor
+        $anoEmVigor = date('Y');
+    
+        // Cria um array representando todos os meses do ano
+        $todosMeses = range(1, 12);
+    
+        // Consulta para obter a soma das taxas de clientes ativas para cada mês do ano
+        $totalTaxasPorMes = DB::table('recebimentos_sat_banks')
+            ->select(DB::raw('MONTH(created_at) as mes'), DB::raw('SUM(taxas_clientes + taxas_comercios) as total_taxas'))
+            ->whereYear('created_at', $anoEmVigor)
+            ->where('status', 'ativo') // Adiciona a condição de status ativo
+            ->groupBy(DB::raw('MONTH(created_at)'))
+            ->get();
+    
+        // Preenche os valores para todos os meses
+        $totalTaxasPorMes = $totalTaxasPorMes->keyBy('mes')->map(function ($item) {
+            return $item->total_taxas;
+        })->toArray();
+    
+        // Preenche os valores para os meses sem registros
+        foreach ($todosMeses as $mes) {
+            if (!isset($totalTaxasPorMes[$mes])) {
+                $totalTaxasPorMes[$mes] = 0;
+            }
+        }
+    
+        // Ordena os resultados pelos meses
+        ksort($totalTaxasPorMes);
+    
+        // Retorna o resultado
+        return response()->json(['total_taxas_por_mes' => $totalTaxasPorMes]);
+    }
+    
+    public function totalCartoes(){
+        $totalCartoesAtivos = DB::table('cartoes')
+                                ->where('status', '=', 'ativo')
+                                ->count();
+    
+        return $totalCartoesAtivos;
+    }
+
+    public function totalClienteBase(){
+        $totalClienteBase = DB::table('clientes')                              
+                                ->count();    
+        return $totalClienteBase;
+    }
+
+    public function totalComerciosBase(){
+        $totalComerciosBase = DB::table('comercios')                              
+                                ->count();    
+        return $totalComerciosBase;
+    }
 
 
     /**
