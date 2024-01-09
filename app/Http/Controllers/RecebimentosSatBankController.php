@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\recebimentos_sat_bank;
 use App\Http\Requests\Storerecebimentos_sat_bankRequest;
 use App\Http\Requests\Updaterecebimentos_sat_bankRequest;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class RecebimentosSatBankController extends Controller
@@ -35,14 +37,39 @@ class RecebimentosSatBankController extends Controller
         // Retorna o resultado
         return response()->json(['total_taxas' => $totalTaxas]);
     }
+    public function totalVendasComercio()
+    {
+        $userId = Auth::id();
 
-    public function totalAno(){
+        $comercioId = DB::table('comercios')->where('users_id', $userId)->value('id');
+
+        if ($comercioId) {
+            $mesEmVigor = date('m');
+    
+            // Construir datas do mês em vigor
+            $firstDayOfMonth = date('Y-m-01 00:00:00', strtotime(date('Y-' . $mesEmVigor . '-01')));    
+            $lastDayOfMonth = date('Y-m-t 23:59:59', strtotime(date('Y-' . $mesEmVigor . '-01')));
+            
+            $totalVendas = DB::table('movimentacao_cliente_comercios')
+                ->where('comercios_id', $comercioId)
+                ->where('status', 'ativo')
+                ->whereBetween('created_at', [$firstDayOfMonth, $lastDayOfMonth])
+                ->sum('valor');
+
+            return $totalVendas;
+        } else {
+            return "Comércio não encontrado para o usuário logado.";
+        }
+    }
+
+    public function totalAno()
+    {
         // Obtém o ano em vigor
         $anoEmVigor = date('Y');
-    
+
         // Cria um array representando todos os meses do ano
         $todosMeses = range(1, 12);
-    
+
         // Consulta para obter a soma das taxas de clientes ativas para cada mês do ano
         $totalTaxasPorMes = DB::table('recebimentos_sat_banks')
             ->select(DB::raw('MONTH(created_at) as mes'), DB::raw('SUM(taxas_clientes + taxas_comercios) as total_taxas'))
@@ -50,43 +77,46 @@ class RecebimentosSatBankController extends Controller
             ->where('status', 'ativo') // Adiciona a condição de status ativo
             ->groupBy(DB::raw('MONTH(created_at)'))
             ->get();
-    
+
         // Preenche os valores para todos os meses
         $totalTaxasPorMes = $totalTaxasPorMes->keyBy('mes')->map(function ($item) {
             return $item->total_taxas;
         })->toArray();
-    
+
         // Preenche os valores para os meses sem registros
         foreach ($todosMeses as $mes) {
             if (!isset($totalTaxasPorMes[$mes])) {
                 $totalTaxasPorMes[$mes] = 0;
             }
         }
-    
+
         // Ordena os resultados pelos meses
         ksort($totalTaxasPorMes);
-    
+
         // Retorna o resultado
         return response()->json(['total_taxas_por_mes' => $totalTaxasPorMes]);
     }
-    
-    public function totalCartoes(){
+
+    public function totalCartoes()
+    {
         $totalCartoesAtivos = DB::table('cartoes')
-                                ->where('status', '=', 'ativo')
-                                ->count();
-    
+            ->where('status', '=', 'ativo')
+            ->count();
+
         return $totalCartoesAtivos;
     }
 
-    public function totalClienteBase(){
-        $totalClienteBase = DB::table('clientes')                              
-                                ->count();    
+    public function totalClienteBase()
+    {
+        $totalClienteBase = DB::table('clientes')
+            ->count();
         return $totalClienteBase;
     }
 
-    public function totalComerciosBase(){
-        $totalComerciosBase = DB::table('comercios')                              
-                                ->count();    
+    public function totalComerciosBase()
+    {
+        $totalComerciosBase = DB::table('comercios')
+            ->count();
         return $totalComerciosBase;
     }
 

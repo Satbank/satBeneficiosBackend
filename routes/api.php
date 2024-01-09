@@ -35,5 +35,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('/movimentacaoClienteComercio', MovimentacaoClienteComercioController::class);  
     Route::get('/relatorioComercio', [MovimentacaoClienteComercioController::class, 'getRelatorios']);
     Route::get('/estorno', [MovimentacaoClienteComercioController::class, 'estornar']);
+    Route::get('/totalvendacomercio',[RecebimentosSatBankController::class , 'totalVendasComercio']);
+
     //Route::apiResource('/empresas', ComercioController::class);
 });
