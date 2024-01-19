@@ -7,6 +7,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Prefeitura extends Model
 {
+    protected $fillable = [
+        'users_id',
+        'perfils_id',
+        'cnpj',
+        'telefone',   
+        'rua',
+        'numero',
+        'bairro',      
+        'cidade',
+        'uf',
+        'tentativas'
+    ];
     use HasFactory;
     public function user()
     {
